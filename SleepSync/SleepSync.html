@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sleep Syn</title>
+  <style>
+    :root{
+      --bg: #f4f4f4;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #6b7280;
+      --accent: #6a5af9;
+      --accent-2: #9b72ff;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Arial, Helvetica, sans-serif;margin:0;background:var(--bg);color:var(--text);transition:background .25s,color .25s}
+    .container{max-width:760px;margin:18px auto;padding:16px}
+    h1{text-align:center;margin:18px 0}
+    .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .row{display:flex;gap:12px;align-items:flex-start}
+    .col{flex:1}
+    input, select, button {width:100%;padding:10px;border-radius:8px;border:1px solid #dcdcdc;font-size:15px}
+    button{cursor:pointer;background:var(--accent);color:white;border:none;font-weight:700}
+    button:hover{opacity:.95}
+    small.muted{color:var(--muted);display:block;margin-top:6px}
+
+    /* XP visuals */
+    .xp-header{display:flex;justify-content:space-between;align-items:center}
+    .xp-big{font-weight:800;font-size:22px}
+    .tier-tag{
+      padding:8px 14px;
+      border-radius:14px;
+      font-weight:800;
+      display:inline-block;
+      color:white;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+      transition: background .35s, box-shadow .35s, color .25s;
+    }
+    .xp-bar-wrap{margin-top:12px}
+    .xp-bar-bg{height:14px;background:#eee;border-radius:999px;overflow:hidden}
+    .xp-bar-fill{height:100%;width:0%;transition:width .8s ease, background .4s}
+    .xp-meta{display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:13px}
+
+    /* pie */
+    .pie-center{text-align:center}
+    .pie-chart{width:120px;height:120px;border-radius:50%;margin:10px auto;background:conic-gradient(var(--accent) 0deg,#ddd 0deg);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text)}
+
+    /* badges */
+    .badges-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:12px}
+    .badge-card{display:flex;gap:12px;align-items:center;background:#fbfbff;border-radius:10px;padding:10px;border:1px solid #eef2ff;transition:transform .28s,box-shadow .28s}
+    .badge-card.locked{opacity:.45;filter:grayscale(.06)}
+    .badge-card.unlocked{box-shadow:0 10px 30px rgba(100,80,200,.12);transform:translateY(-6px);animation:pop .45s ease}
+    .badge-icon{width:48px;height:48px;border-radius:10px;color:white;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .badge-title{font-weight:800}
+    .badge-desc{font-size:13px;color:var(--muted)}
+    @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+
+    /* Tier glow helper */
+    .tier-glow {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08), 0 0 30px rgba(0,0,0,0.04) inset;
+    }
+
+    /* dark mode */
+    body.dark{background:#0f1724;color:#e6eef6}
+    body.dark .card{background:#0b1220; box-shadow: 0 8px 20px rgba(0,0,0,0.6)}
+    body.dark .badge-card{background:#071025;border:1px solid rgba(255,255,255,0.03)}
+    body.dark .muted{color:#9aa6b2}
+    body.dark input, body.dark select {background:#071025;color:#e6eef6;border:1px solid rgba(255,255,255,0.06)}
+    body.dark .pie-chart{color:#e6eef6}
+
+    @media(max-width:820px){.row{flex-direction:column}}
+  </style>
+</head>
+<body>
+
+  <h1>Sleep Sync</h1>
+
+  <div class="container">
+
+    <!-- log inputs: hours + bedtime -->
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input id="hoursInput" type="number" min="0" step="0.25" placeholder="Hours slept (e.g., 7.5)">
+        <input id="bedtimeInput" type="time" placeholder="Bedtime (optional)">
+        <button id="logBtn">Log Sleep</button>
+      </div>
+      <small class="muted">Rules: +10 XP per hour. Streak bonus +50 XP for extending streak. Bedtime optional (used for Early Bird / Night Owl badges).</small>
+    </div>
+
+    <div class="row">
+      <div class="col card">
+        <div class="xp-header">
+          <div>
+            <div class="xp-big">XP: <span id="xpVal">0</span></div>
+            <small class="muted" id="xpSub">Total XP</small>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Tier</div>
+            <div id="tierTag" class="tier-tag">Bronze</div>
+          </div>
+        </div>
+
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-bg" style="margin-top:12px">
+            <div id="xpFill" class="xp-bar-fill" style="background:#6a5af9;width:0%"></div>
+          </div>
+          <div class="xp-meta">
+            <div id="tierProgress" class="muted">0 XP inside tier</div>
+            <div id="toNext" class="muted">0 XP to next tier</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px" class="pie-center">
+          <div id="sleepPie" class="pie-chart">0h</div>
+          <small class="muted">Sleep duration visual (of 12h)</small>
+        </div>
+      </div>
+
+      <div class="col card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Badges</h3>
+          <small class="muted">Unlocked badges appear below</small>
+        </div>
+
+        <div id="badgesGrid" class="badges-grid" style="margin-top:12px">
+          <!-- badges injected here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px">
+          <h4 style="margin:0 0 8px 0">Theme</h4>
+          <select id="themeSelect">
+            <option value="default">Default</option>
+            <option value="night">Night</option>
+            <option value="sunny">Sunny</option>
+          </select>
+        </div>
+
+        <div style="flex:1;min-width:220px">
+          <h4 style="margin:0 0 8px 0">Set Reminder</h4>
+          <div style="display:flex;gap:8px">
+            <select id="reminderTime">
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="20">20 min</option>
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="50">50 min</option>
+            </select>
+            <button id="setReminderBtn">Set</button>
+          </div>
+          <small class="muted" id="reminderStatus"></small>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <h4 style="margin:0 0 8px 0">Reminder History</h4>
+        <ul id="reminderHistory" class="muted" style="padding-left:18px;margin:0"></ul>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:10px;color:var(--muted)">Data saved locally (localStorage).</div>
+  </div>
+
+<script>
+/* ---------- Config & state ---------- */
+const STORAGE = 'sleepsync_opt2_state_v1'
+const TIERS = [
+  {name:'Bronze', req:0, color:'#cd7f32'},
+  {name:'Silver', req:200, color:'#c0c0c0'},
+  {name:'Gold', req:500, color:'#ffd700'},
+  {name:'Platinum', req:900, color:'#e5e4e2'},
+  {name:'Diamond', req:1400, color:'#b9f2ff'},
+  {name:'Master', req:2000, color:'#9b30ff'}
+]
+const BADGES = [
+  {id:'early', title:'Early Bird', desc:'Bedtime ≤ 22:00', color:'#a1c4fd', check: s => s.lastEntry && s.lastEntry.bedtimeHour !== null && s.lastEntry.bedtimeHour <= 22},
+  {id:'night', title:'Night Owl', desc:'Bedtime ≥ 23:00 or before 03:00', color:'#5b3fd1', check: s => s.lastEntry && s.lastEntry.bedtimeHour !== null && (s.lastEntry.bedtimeHour >= 23 || s.lastEntry.bedtimeHour < 3)},
+  {id:'healthy', title:'Healthy Sleep', desc:'Sleep ≥ 8h', color:'#9be15d', check: s => s.lastEntry && s.lastEntry.duration >= 8},
+  {id:'power', title:'Power Sleeper', desc:'Sleep ≥ 9h', color:'#f6d365', check: s => s.lastEntry && s.lastEntry.duration >= 9},
+  {id:'legend', title:'Sleep Legend', desc:'Sleep ≥ 10h', color:'#ffd700', check: s => s.lastEntry && s.lastEntry.duration >= 10},
+  {id:'streak', title:'Streak Master', desc:'7-day streak', color:'#fbc2eb', check: s => s.maxStreak >= 7},
+  {id:'marathon', title:'Marathon Sleeper', desc:'Sleep ≥ 12h once', color:'#ff9a9e', check: s => s.lastEntry && s.lastEntry.duration >= 12},
+  {id:'calm', title:'Calm Mind', desc:'Improved by ≥1h', color:'#a8edea', check: s => {
+      if(!s.entries || s.entries.length < 2) return false
+      const last = s.entries[s.entries.length-1].duration
+      const prev = s.entries[s.entries.length-2].duration
+      return (last - prev) >= 1
+    }},
+  {id:'recovery', title:'Recovery Mode', desc:'Recovered after low sleep', color:'#c7f9cc', check: s => {
+      if(!s.entries || s.entries.length < 2) return false
+      const last = s.entries[s.entries.length-1].duration
+      const prev = s.entries[s.entries.length-2].duration
+      return prev < 5 && last >= 7
+    }},
+  {id:'xp0', title:'Beginner', desc:'Reach 0 XP', color:'#6a5af9', check: s => s.xp >= 0},
+  {id:'xp100', title:'Intermediate', desc:'Reach 100 XP', color:'#6a5af9', check: s => s.xp >= 100},
+  {id:'xp300', title:'Advanced', desc:'Reach 300 XP', color:'#6a5af9', check: s => s.xp >= 300},
+  {id:'xp600', title:'Elite', desc:'Reach 600 XP', color:'#6a5af9', check: s => s.xp >= 600},
+  {id:'xp1000', title:'Master', desc:'Reach 1000 XP', color:'#6a5af9', check: s => s.xp >= 1000}
+]
+
+const DEFAULT = { xp:0, entries:[], lastEntryDate:null, lastEntry:null, streak:0, maxStreak:0, unlocked:[], reminders:[] }
+let state = loadState()
+
+/* ---------- DOM ---------- */
+const hoursInput = document.getElementById('hoursInput')
+const bedtimeInput = document.getElementById('bedtimeInput')
+const logBtn = document.getElementById('logBtn')
+const xpVal = document.getElementById('xpVal')
+const xpFill = document.getElementById('xpFill')
+const tierTag = document.getElementById('tierTag')
+const tierProgress = document.getElementById('tierProgress')
+const toNext = document.getElementById('toNext')
+const badgesGrid = document.getElementById('badgesGrid')
+const sleepPie = document.getElementById('sleepPie')
+const themeSelect = document.getElementById('themeSelect')
+const setReminderBtn = document.getElementById('setReminderBtn')
+const reminderTimeSelect = document.getElementById('reminderTime')
+const reminderStatus = document.getElementById('reminderStatus')
+const reminderHistory = document.getElementById('reminderHistory')
+
+/* ---------- init ---------- */
+renderBadgesGrid()
+renderAll()
+
+/* ---------- helpers ---------- */
+function saveState(){ localStorage.setItem(STORAGE, JSON.stringify(state)) }
+function loadState(){ try{ const raw = localStorage.getItem(STORAGE); return raw ? Object.assign({}, DEFAULT, JSON.parse(raw)) : JSON.parse(JSON.stringify(DEFAULT)) }catch(e){ console.error(e); return JSON.parse(JSON.stringify(DEFAULT)) } }
+function todayISO(){ return new Date().toISOString().slice(0,10) }
+function dayDiff(a,b){ return Math.round((new Date(b)-new Date(a))/(1000*60*60*24)) }
+function parseHour(timeStr){
+  if(!timeStr) return null
+  const parts = timeStr.split(':').map(Number)
+  return Number.isFinite(parts[0]) ? parts[0] : null
+}
+function getContrastColor(hex){ // returns 'black' or 'white' for readability
+  if(!hex) return 'white'
+  // normalize
+  hex = hex.replace('#','')
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('')
+  const r = parseInt(hex.slice(0,2),16)
+  const g = parseInt(hex.slice(2,4),16)
+  const b = parseInt(hex.slice(4,6),16)
+  // luminance
+  const yiq = ((r*299)+(g*587)+(b*114))/1000
+  return yiq >= 128 ? 'black' : 'white'
+}
+
+/* ---------- core: log sleep ---------- */
+logBtn.addEventListener('click', ()=>{
+  const hrs = Number(hoursInput.value)
+  if(!hrs || hrs <= 0) return alert('Enter valid hours (e.g., 7.5)')
+
+  const bt = bedtimeInput.value || null
+  const btHour = parseHour(bt)
+
+  // compute xp
+  const earned = Math.round(hrs * 10)   // 10 XP/hour
+  state.xp += earned
+
+  // push entry
+  const entry = { date: todayISO(), duration: hrs, xp: earned, bedtime: bt, bedtimeHour: btHour }
+  state.entries.push(entry)
+  state.lastEntry = entry
+
+  // streak logic
+  const last = state.lastEntryDate
+  const now = todayISO()
+  if(last === now){
+    // same day logged -> do nothing for streak
+  } else if(last && dayDiff(last, now) === 1){
+    state.streak += 1
+  } else {
+    state.streak = 1
+  }
+  state.lastEntryDate = now
+  if(state.streak > state.maxStreak) state.maxStreak = state.streak
+
+  // streak bonus when extending streak
+  if(state.streak > 1) state.xp += 50
+
+  // check badges
+  checkBadges()
+
+  saveState()
+  renderAll()
+  hoursInput.value = ''
+  bedtimeInput.value = ''
+})
+
+/* ---------- badges rendering & check ---------- */
+function renderBadgesGrid(){
+  badgesGrid.innerHTML = ''
+  for(const b of BADGES){
+    const card = document.createElement('div')
+    card.className = 'badge-card locked'
+    card.id = 'badge_'+b.id
+
+    const icon = document.createElement('div')
+    icon.className = 'badge-icon'
+    icon.style.background = b.color
+    icon.innerText = (b.title.split(' ')[0]||'B')[0]
+
+    const info = document.createElement('div')
+    const title = document.createElement('div'); title.className='badge-title'; title.innerText = b.title
+    const desc = document.createElement('div'); desc.className='badge-desc'; desc.innerText = b.desc
+    info.appendChild(title); info.appendChild(desc)
+
+    card.appendChild(icon); card.appendChild(info)
+    badgesGrid.appendChild(card)
+  }
+}
+
+function checkBadges(){
+  const newly = []
+  for(const b of BADGES){
+    const have = state.unlocked.includes(b.id)
+    try{
+      const ok = !!b.check(state)
+      if(ok && !have){
+        state.unlocked.push(b.id)
+        newly.push(b.id)
+      }
+    }catch(e){ console.error('badge check err', e) }
+  }
+  if(newly.length){
+    // animate newly unlocked badges
+    for(const id of newly){
+      const el = document.getElementById('badge_'+id)
+      if(el){ el.classList.remove('locked'); el.classList.add('unlocked') }
+    }
+  }
+}
+
+/* ---------- tier logic ---------- */
+function findTier(xp){
+  let t = TIERS[0]
+  for(let i=TIERS.length-1;i>=0;i--) if(xp >= TIERS[i].req){ t = TIERS[i]; break }
+  return t
+}
+function progressInsideTier(xp){
+  const tier = findTier(xp)
+  const idx = TIERS.indexOf(tier)
+  const currReq = tier.req
+  const nextReq = (idx < TIERS.length-1) ? TIERS[idx+1].req : tier.req + 400
+  const inside = Math.max(0, Math.min(1, (xp - currReq) / (nextReq - currReq)))
+  const toNext = Math.max(0, nextReq - xp)
+  return {tier, inside, toNext, currReq, nextReq}
+}
+
+/* ---------- render ---------- */
+function renderAll(){
+  xpVal.innerText = state.xp
+  const p = progressInsideTier(state.xp)
+  xpFill.style.width = Math.round(p.inside * 100) + '%'
+  // apply tier color + gradient look to tierTag
+  applyTierStyle(p.tier)
+
+  tierProgress.innerText = `${Math.max(0, state.xp - p.currReq)} XP inside ${p.tier.name}`
+  toNext.innerText = p.toNext > 0 ? `${p.toNext} XP to next tier` : 'Next tier reached'
+
+  // badges class updates
+  for(const b of BADGES){
+    const el = document.getElementById('badge_'+b.id)
+    if(!el) continue
+    if(state.unlocked.includes(b.id)){ el.classList.remove('locked'); el.classList.add('unlocked') }
+    else { el.classList.add('locked'); el.classList.remove('unlocked') }
+  }
+
+  // pie
+  if(state.lastEntry && typeof state.lastEntry.duration === 'number') updatePie(state.lastEntry.duration)
+  else updatePie(0)
+
+  renderReminders()
+}
+
+/* apply tier style function (gradient/glow + contrast) */
+function applyTierStyle(tier){
+  // choose color and gradient
+  const c = tier.color || '#6a5af9'
+  // gradient for shiny badge: darker + lighter variation
+  const lighter = shadeColor(c, 18)
+  const darker = shadeColor(c, -10)
+  // apply gradient background to xpFill too (keeps progress color)
+  xpFill.style.background = `linear-gradient(90deg, ${lighter}, ${c})`
+  // tierTag style: gradient + glow
+  const tag = tierTag
+  tag.style.background = `linear-gradient(90deg, ${lighter}, ${c})`
+  tag.style.color = getContrastColor(hexFromColor(c))
+  tag.style.boxShadow = `0 8px 30px ${hexToRgba(c,0.18)} , 0 0 12px ${hexToRgba(c,0.10)}`
+}
+
+/* helpers to convert / shade colors */
+function hexFromColor(color){
+  // Accept hex or rgb like '#aabbcc' or 'rgb(10,20,30)' or named color
+  if(!color) return '#6a5af9'
+  if(color.startsWith('#')) return color
+  if(color.startsWith('rgb')) {
+    const nums = color.match(/\d+/g).map(Number)
+    return '#'+nums.map(n=>n.toString(16).padStart(2,'0')).join('')
+  }
+  // fallback
+  return '#6a5af9'
+}
+function hexToRgba(hex, alpha){
+  const h = hexFromColor(hex).replace('#','')
+  const r = parseInt(h.slice(0,2),16)
+  const g = parseInt(h.slice(2,4),16)
+  const b = parseInt(h.slice(4,6),16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+function shadeColor(hex, percent) {
+  // hex like '#rrggbb', percent positive to lighten, negative to darken
+  hex = hexFromColor(hex).replace('#','')
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('')
+  const r = Math.min(255, Math.max(0, parseInt(hex.substring(0,2),16) + (255 * percent/100)))
+  const g = Math.min(255, Math.max(0, parseInt(hex.substring(2,4),16) + (255 * percent/100)))
+  const b = Math.min(255, Math.max(0, parseInt(hex.substring(4,6),16) + (255 * percent/100)))
+  return '#'+((1<<24)+(Math.round(r)<<16)+(Math.round(g)<<8)+Math.round(b)).toString(16).slice(1)
+}
+function getContrastColor(hex){ // returns 'black' or 'white' for readability
+  if(!hex) return 'white'
+  hex = hexFromColor(hex).replace('#','')
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('')
+  const r = parseInt(hex.slice(0,2),16)
+  const g = parseInt(hex.slice(2,4),16)
+  const b = parseInt(hex.slice(4,6),16)
+  const yiq = ((r*299)+(g*587)+(b*114))/1000
+  return yiq >= 128 ? 'black' : 'white'
+}
+
+/* ---------- pie ---------- */
+function updatePie(hours){
+  const max = 12
+  const deg = Math.min(360, (hours / max) * 360)
+  sleepPie.style.background = `conic-gradient(${getTierColor()} ${deg}deg, #ddd 0deg)`
+  sleepPie.innerText = `${hours}h`
+}
+function getTierColor(){ return findTier(state.xp).color || '#6a5af9' }
+
+/* ---------- reminders ---------- */
+setReminderBtn.addEventListener('click', ()=>{
+  const mins = Number(reminderTimeSelect.value)
+  if(!mins) return
+  const timeStr = new Date().toLocaleTimeString()
+  state.reminders.push({mins, timeStr})
+  saveState()
+  renderReminders()
+  reminderStatus.innerText = `Reminder for ${mins} minute(s) set.`
+  setTimeout(()=> alert('⏰ Sleep Sync Reminder!'), mins * 60000)
+})
+function renderReminders(){
+  reminderHistory.innerHTML = ''
+  for(const r of state.reminders){
+    const li = document.createElement('li')
+    li.innerText = `${r.mins} min — set at ${r.timeStr}`
+    reminderHistory.appendChild(li)
+  }
+}
+
+/* ---------- theme (dark mode) ---------- */
+themeSelect.addEventListener('change', ()=>{
+  const val = themeSelect.value
+  if(val === 'night'){
+    document.body.classList.add('dark')
+  } else {
+    document.body.classList.remove('dark')
+    if(val === 'sunny'){
+      document.body.style.background = '#fff7ed'
+      document.body.style.color = '#31261e'
+    } else {
+      document.body.style.background = ''
+      document.body.style.color = ''
+    }
+  }
+})
+
+/* ---------- initial checks / load ---------- */
+checkBadges()
+renderAll()
+saveState()
+
+/* expose for debug */
+window._sleepSync = { state, TIERS, BADGES }
+
+</script>
+</body>
+</html>
