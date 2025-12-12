@@ -143,5 +143,7 @@ This project is designed to be easy to understand and explain during presentatio
 **Parth Rohilla**
 
 ### 🔗 Connect With Me
+GitHub:https://github.com/Parth2753
+<br>
+Linkedin:www.linkedin.com/in/parth-rohilla-b14919361
 
-* **GitHub:
