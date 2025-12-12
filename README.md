@@ -1,8 +1,10 @@
 # Task-31 Sleep Sync 💤
 
-**Sleep pattern and cycle visualiza-tion app — Domain: Health 🩺**
-A Task Problem that I chose from FEWDL Task PDF 📄
-
+**Sleep pattern and cycle visualization app 
+<br>
+Domain: Health 🩺**
+<br>
+## A Task Problem that I chose from FEWDL Task PDF 📄
 ---
 
 ## 🌙 Overview
