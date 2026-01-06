@@ -20,130 +20,76 @@ Sleep Sync is a lightweight web project designed to help users:
 
 ---
 
-## ✨ Features
 
-### ✔ Sleep Logging
+🎯 Objectives
+---
+1) Track daily sleep hours
 
-Users can enter how many hours they slept.
+2) Visualize sleep patterns over time
 
-* 10 XP is awarded per hour of sleep ✨
+3) Encourage healthy sleep habits using gamification
+
+4) Practice modern frontend development concepts
 
 ---
-
-### ✔ XP System
-
-XP increases based on sleep hours.
-
-* Example: 7 hours = 70 XP 💯
-
+✨ Key Features
 ---
 
-### ✔ Tier System
+✅ Sleep hour input with validation
 
-Tiers upgrade as XP increases.
+✅ XP system based on sleep duration
 
-* **Bronze** 🥉 → 0 XP
-* **Silver** 🥈 → 100 XP
-* **Gold** 🥇 → 300 XP and above
+✅ Circular sleep quality indicator
 
----
+✅ 7-day sleep trend graph (Canvas)
 
-### ✔ Badges
+✅ Streak tracking with animations
 
-Badges reward good sleep habits.
+✅ Badge unlocking system
 
-* **Healthy Sleep Badge** 💤 → Earned when user sleeps **8+ hours**
+✅ Light & Dark mode toggle
 
----
-
-### ✔ Customizable Themes
-
-Users can switch between:
-
-* Default Theme 🎨
-* Night Mode 🌙
-* Sunny Mode 🌞
-
-The theme preview updates instantly.
+✅ Export sleep data as CSV report
 
 ---
-
-### ✔ Sleep Reminder System
-
-Users can set reminders for:
-
-* 5 minutes ⏱️
-* 10 minutes ⏱️
-* 20 minutes ⏱️
-* 30 minutes ⏱️
-* 45 minutes ⏱️
-* 50 minutes ⏱️
-
-A popup alert triggers after the selected time.
+🛠️ Technologies Used
+---
+1) Frontend
+2) HTML5 – Structure and layout
+3) CSS3 – Grid, Flexbox, variables, animations, dark mode
+4) JavaScript (ES6) – Logic, DOM manipulation, Canvas API
+4) Browser APIs
+5) Canvas API (graph plotting)
+6) Blob API (CSV export)
+7) DOM API
+---
+🧠 Core Concepts Implemented
+---
+1) State management using JavaScript objects
+2) Event handling and user interaction
+3) Gamification logic (XP, badges, streaks)
+4) Dynamic UI updates
+5) Responsive dashboard layout
+6) Theme switching using CSS variables
+---
+⚙️ How the App Works
+---
+1) User enters daily sleep hours
+2) XP is calculated and added
+3) Sleep history updates (7-day window)
+4) Progress ring and graph update
+5) Badges unlock based on milestones
+6) User can export the sleep report
+---
+📂 Project Structure-
+---
+SleepSync.html
+(Single-file project with HTML, CSS, and JavaScript)
 
 ---
-
-### ✔ Reminder History
-
-Whenever a reminder is set, the app saves:
-
-* Reminder duration ⏲️
-* Exact time when it was created 📅
-
-This helps users track their sleep routine.
-
+🚀 How to Run the Project
 ---
-
-## 🛠️ Technologies Used
-
-* **HTML** – Structure 🏗️
-* **CSS** – Styling 🎨
-* **JavaScript** – Functionality and logic 💻
-
----
-
-## 📌 How It Works (Simple Explanation)
-
-1. User enters sleep hours → XP increases 🌟
-2. Based on XP, the tier changes 🏆
-3. Sleeping 8+ hours unlocks a badge 🥇
-4. User chooses a theme which updates instantly 🎨
-5. A reminder can be set with a selected duration ⏰
-6. The reminder history logs the details 📜
-
----
-
-## 🧩 Code Structure
-
-* **Sleep logging function** handles XP and badges 📝
-* **Update UI function** updates XP, badges, and tier in real-time 🔄
-* **Theme function** changes background and text colors 🎨
-* **Reminder function** triggers an alert after selected time ⏰
-* **History function** logs every reminder in a list 📋
-
----
-
-## 🎯 Future Add-Ons (Optional)
-
-* LocalStorage saving for reminders and XP 💾
-* More themes 🎨
-* Weekly sleep goals 📅
-* Animated avatars based on sleep quality 👤
-
----
-
-## 📄 Project Goal
-
-This project is designed to be easy to understand and explain during presentations or college reviews while still containing fun and gamified features 🎮.
-
----
-
-## 👤 Developer
-
-**Parth Rohilla**
-
-### 🔗 Connect With Me
-GitHub:https://github.com/Parth2753
-<br>
-Linkedin:www.linkedin.com/in/parth-rohilla-b14919361
-
+1) Download or clone the repository
+2) Open SleepSync.html in any modern browser
+3) Enter sleep hours and explore the dashboard
+4) No backend or installation required.
