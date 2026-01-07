@@ -36,19 +36,12 @@ Sleep Sync is a lightweight web project designed to help users:
 ---
 
 ✅ Sleep hour input with validation
-
 ✅ XP system based on sleep duration
-
 ✅ Circular sleep quality indicator
-
 ✅ 7-day sleep trend graph (Canvas)
-
 ✅ Streak tracking with animations
-
 ✅ Badge unlocking system
-
 ✅ Light & Dark mode toggle
-
 ✅ Export sleep data as CSV report
 
 ---
